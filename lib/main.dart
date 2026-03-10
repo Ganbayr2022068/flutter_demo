@@ -13,15 +13,6 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-getIt() {
-}
-
-class LocalStorage {
-}
-
-void setupServiceLocator() {
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
