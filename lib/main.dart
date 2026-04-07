@@ -9,7 +9,6 @@ import 'package:flutter_demo/ui/demos/3_state_managment/state_management_demo.da
 import 'package:flutter_demo/ui/demos/4_user_login/login_screen.dart';
 import 'package:flutter_demo/ui/demos/5_sqlite/sqlite_demo.dart';
 import 'package:flutter_demo/ui/settings/settings_screen.dart';
-import 'ui/demos/1_dart/dart_demo_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
