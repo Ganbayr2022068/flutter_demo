@@ -9,6 +9,8 @@ import 'package:flutter_demo/ui/demos/3_state_managment/state_management_demo.da
 import 'package:flutter_demo/ui/demos/4_user_login/login_screen.dart';
 import 'package:flutter_demo/ui/demos/5_sqlite/sqlite_demo.dart';
 import 'package:flutter_demo/ui/settings/settings_screen.dart';
+import 'package:flutter_demo/ui/demos/5_sqlite/database.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +19,7 @@ Future<void> main() async {
   // TODO: fix firebase
   // await getIt<Auth>().init();
   await getIt<AppState>().init();
+   await getIt<DatabaseHelper>().init();
   runApp(const MyApp());
 }
 
