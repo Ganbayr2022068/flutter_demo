@@ -13,25 +13,58 @@ class PaintingDemo extends StatefulWidget {
 }
 
 class _PaintingDemoState extends State<PaintingDemo> {
+  Offset start = Offset(50, 50);
+  Offset cp1 = Offset(30, 150);
+  Offset cp2 = Offset(270, 50);
+  Offset end = Offset(240, 150);
+
+  Offset? _dragging;
+
+  Offset? _hitTest(Offset pos) {
+    for (final pt in [cp1, cp2, end]) {
+      if ((pt - pos).distance < 20) return pt;
+    }
+    return null;
+  }
+
+  void _onPanStart(DragStartDetails d) {
+    _dragging = _hitTest(d.localPosition);
+  }
+
+  void _onPanUpdate(DragUpdateDetails d) {
+    if (_dragging == null) return;
+    setState(() {
+      if (_dragging == cp1) cp1 = d.localPosition;
+      else if (_dragging == cp2) cp2 = d.localPosition;
+      else if (_dragging == end) end = d.localPosition;
+      _dragging = d.localPosition;
+    });
+  }
+
+  void _onPanEnd(DragEndDetails d) => _dragging = null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(),
-      // body: Center(
-      //   child: Container(
-      //     // color: Colors.cyan,
-      //     child: ProgressBar(
-      //       barColor: Colors.blue,
-      //       thumbColor: Colors.red,
-      //       thumbSize: 20.0,
-      //     ),
-      //   ),
-      // ),
+      appBar: AppBar(title: Text('Bezier Curves')),
       body: Center(
         child: Container(
           decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-          child: CustomPaint(size: Size(300, 300), painter: MyPainter()),
+          child: GestureDetector(
+            onPanStart: _onPanStart,
+            onPanUpdate: _onPanUpdate,
+            onPanEnd: _onPanEnd,
+            child: CustomPaint(
+              size: Size(300, 300),
+              painter: MyPainter(
+                start: start,
+                cp1: cp1,
+                cp2: cp2,
+                end: end,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -39,25 +72,59 @@ class _PaintingDemoState extends State<PaintingDemo> {
 }
 
 class MyPainter extends CustomPainter {
+  final Offset start, cp1, cp2, end;
+
+  MyPainter({
+    required this.start,
+    required this.cp1,
+    required this.cp2,
+    required this.end,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
+    final guidePaint = Paint()
+      ..color = Colors.grey.withOpacity(0.5)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(start, cp1, guidePaint);
+    canvas.drawLine(end, cp2, guidePaint);
+
     final path = Path()
-      ..moveTo(50, 50)
-      //..lineTo(150, 150)
-      //..quadraticBezierTo(30, 150, 150, 100)
-      //..quadraticBezierTo(30, 150, 250, 150);
-      ..cubicTo(30, 150, 270, 50, 240, 150);
-    final paint = Paint()
+      ..moveTo(start.dx, start.dy)
+      ..cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, end.dx, end.dy);
+
+    final curvePaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4;
-    canvas.drawPath(path, paint);
+    canvas.drawPath(path, curvePaint);
+
+    final dotPaint = Paint()..color = Colors.red;
+    canvas.drawCircle(cp1, 8, dotPaint);
+    canvas.drawCircle(cp2, 8, dotPaint);
+    canvas.drawCircle(end, 8, dotPaint);
+
+    canvas.drawCircle(start, 8, Paint()..color = Colors.blue);
+
+    _drawLabel(canvas, 'CP1', cp1);
+    _drawLabel(canvas, 'CP2', cp2);
+    _drawLabel(canvas, 'End', end);
+  }
+
+  void _drawLabel(Canvas canvas, String text, Offset pos) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(color: Colors.red, fontSize: 11),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, pos + Offset(10, -10));
   }
 
   @override
-  bool shouldRepaint(CustomPainter old) {
-    return false;
-  }
+  bool shouldRepaint(MyPainter old) => true;
 }
 
 class ProgressBar extends LeafRenderObjectWidget {
@@ -109,7 +176,6 @@ class RenderProgressBar extends RenderBox {
   }) : _barColor = barColor,
        _thumbColor = thumbColor,
        _thumbSize = thumbSize {
-    // initialize the gesture recognizer
     _drag = HorizontalDragGestureRecognizer()
       ..onStart = (DragStartDetails details) {
         _updateThumbPosition(details.localPosition);
@@ -185,7 +251,6 @@ class RenderProgressBar extends RenderBox {
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
 
-    // paint bar
     final barPaint = Paint()
       ..color = barColor
       ..strokeWidth = 5;
@@ -193,7 +258,6 @@ class RenderProgressBar extends RenderBox {
     final point2 = Offset(size.width, size.height / 2);
     canvas.drawLine(point1, point2, barPaint);
 
-    // paint thumb
     final thumbPaint = Paint()..color = thumbColor;
     final thumbDx = _currentThumbValue * size.width;
     final center = Offset(thumbDx, size.height / 2);
