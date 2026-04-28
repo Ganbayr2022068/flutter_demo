@@ -46,7 +46,7 @@ class MyPainter extends CustomPainter {
       //..lineTo(150, 150)
       //..quadraticBezierTo(30, 150, 150, 100)
       //..quadraticBezierTo(30, 150, 250, 150);
-      ..cubicTo(30, 150, 270, 50, 240, 150)
+      ..cubicTo(30, 150, 270, 50, 240, 150);
     final paint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.stroke
